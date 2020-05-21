@@ -7,6 +7,7 @@
         <sourceTestOutputDir name="target/generated-test-sources/test-annotations" />
         <outputRelativeToContentRoot value="true" />
         <module name="thinking-in-spring-2.0-aop" />
+        <module name="thinking-in-spring-aop" />
       </profile>
     </annotationProcessing>
     <bytecodeTargetLevel target="8" />
