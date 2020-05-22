@@ -143,6 +143,8 @@ public class VincentApplicationContext {
                 instance = clazz.newInstance();
 
                 //================AOP开始========================
+                //如果满足条件，就直接返回Proxy对象
+                //加载AOP的配置文件
                 VincentAdvisedSupport config = instantionAopConfig(beanDefinition);
                 config.setTargetClass(clazz);
                 config.setTarget(instance);
