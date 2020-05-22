@@ -3,6 +3,9 @@ package com.vincent.spring.framework.context;
 import com.vincent.spring.framework.annotation.VincentAutowired;
 import com.vincent.spring.framework.annotation.VincentController;
 import com.vincent.spring.framework.annotation.VincentService;
+import com.vincent.spring.framework.aop.VincentJdkDynamicAopProxy;
+import com.vincent.spring.framework.aop.config.VincentAopConfig;
+import com.vincent.spring.framework.aop.support.VincentAdvisedSupport;
 import com.vincent.spring.framework.beans.VincentBeanWrapper;
 import com.vincent.spring.framework.beans.config.VincentBeanDefinition;
 import com.vincent.spring.framework.beans.support.VincentBeanDefinitionReader;
@@ -138,12 +141,36 @@ public class VincentApplicationContext {
                 Class<?> clazz = Class.forName(className);
                 //2、默认的类名首字母小写
                 instance = clazz.newInstance();
+
+                //================AOP开始========================
+                VincentAdvisedSupport config = instantionAopConfig(beanDefinition);
+                config.setTargetClass(clazz);
+                config.setTarget(instance);
+
+                //判断规则，要不要生成代理类，如果要就覆盖原生对象
+                //如果不要就不做任何处理，返回原生对象
+                if(config.pointCutMath()){
+                    instance = new VincentJdkDynamicAopProxy(config).getProxy();
+                }
+                //================AOP结束========================
+
                 this.factoryBeanObjectCache.put(beanName, instance);
             }
         }catch (Exception e){
             e.printStackTrace();
         }
         return instance;
+    }
+
+    private VincentAdvisedSupport instantionAopConfig(VincentBeanDefinition beanDefinition) {
+        VincentAopConfig config = new VincentAopConfig();
+        config.setPointCut(this.reader.getConfig().getProperty("pointCut"));
+        config.setAspectClass(this.reader.getConfig().getProperty("aspectClass"));
+        config.setAspectBefore(this.reader.getConfig().getProperty("aspectBefore"));
+        config.setAspectAfter(this.reader.getConfig().getProperty("aspectAfter"));
+        config.setAspectAfterThrow(this.reader.getConfig().getProperty("aspectAfterThrow"));
+        config.setAspectAfterThrowingName(this.reader.getConfig().getProperty("aspectAfterThrowingName"));
+        return new VincentAdvisedSupport(config);
     }
 
     public Object getBean(Class beanClass){
